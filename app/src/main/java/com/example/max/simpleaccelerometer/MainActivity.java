@@ -14,13 +14,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float lastX, lastY, lastZ;
 
     private SensorManager mSensorManager;
-    private Sensor mAccel;
+    private Sensor mAccelerometer;
 
     private float deltaX = 0;
     private float deltaY = 0;
     private float deltaZ = 0;
 
-    private TextView currentX, currentY, currentZ;
+    private TextView linearX, linearY, linearZ, linearMag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +32,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             // Success: we have an accelerometer
-            mAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
     public void initializeViews() {
-        currentX = (TextView) findViewById(R.id.currentX);
-        currentY = (TextView) findViewById(R.id.currentY);
-        currentZ = (TextView) findViewById(R.id.currentZ);
+        linearX = (TextView) findViewById(R.id.LinX);
+        linearY = (TextView) findViewById(R.id.LinY);
+        linearZ = (TextView) findViewById(R.id.LinZ);
+        linearMag = (TextView) findViewById(R.id.LinMag);
     }
 
     @Override
@@ -64,25 +65,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    public void displayCurrentValues() {
+        linearX.setText(Float.toString(deltaX));
+        linearY.setText(Float.toString(deltaY));
+        linearZ.setText(Float.toString(deltaZ));
+        linearMag.setText(Float.toString(magnitude3D(deltaX, deltaY, deltaZ)));
+    }
+
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
     public void displayCleanValues() {
-        currentX.setText("0.0");
-        currentY.setText("0.0");
-        currentZ.setText("0.0");
+        linearX.setText("0.0");
+        linearY.setText("0.0");
+        linearZ.setText("0.0");
+        linearMag.setText("0.0");
     }
 
 
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, mAccel, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this);
+        mSensorManager.unregisterListener(this);
+    }
+
+    private float magnitude3D(float x, float y, float z) {
+        return (float) Math.sqrt(x * x + y * y + z * z);
     }
 }
